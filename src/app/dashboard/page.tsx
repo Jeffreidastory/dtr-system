@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
+import { formatManilaTime, formatManilaTimeForInput } from "@/lib/datetime";
 
 import { addDtrLog, deleteOwnPendingLog, signOut, updateOwnPendingLog } from "./actions";
 import EstimatedCompletionCard from "./EstimatedCompletionCard";
@@ -202,8 +203,8 @@ export default async function DashboardPage() {
                   {typedLogs.map((log) => (
                     <tr key={log.id} className="rounded-xl bg-slate-900/70 text-slate-200">
                       <td className="px-3 py-2 font-medium">{format(new Date(log.work_date), "MMM dd, yyyy")}</td>
-                      <td className="px-3 py-2">{format(new Date(log.time_in), "hh:mm a")}</td>
-                      <td className="px-3 py-2">{log.time_out ? format(new Date(log.time_out), "hh:mm a") : "-"}</td>
+                      <td className="px-3 py-2">{formatManilaTime(log.time_in)}</td>
+                      <td className="px-3 py-2">{formatManilaTime(log.time_out)}</td>
                       <td className="px-3 py-2">{metricValue(log.rendered_hours)}</td>
                       <td className="px-3 py-2">
                         <details>
@@ -216,13 +217,13 @@ export default async function DashboardPage() {
                                 <input
                                   type="time"
                                   name="time_in"
-                                  defaultValue={log.time_in ? format(new Date(log.time_in), "HH:mm") : ""}
+                                  defaultValue={formatManilaTimeForInput(log.time_in)}
                                   className="w-full rounded-md border border-slate-600 bg-slate-900 px-2 py-1 text-slate-100"
                                 />
                                 <input
                                   type="time"
                                   name="time_out"
-                                  defaultValue={log.time_out ? format(new Date(log.time_out), "HH:mm") : ""}
+                                  defaultValue={formatManilaTimeForInput(log.time_out)}
                                   className="w-full rounded-md border border-slate-600 bg-slate-900 px-2 py-1 text-slate-100"
                                 />
                               </div>

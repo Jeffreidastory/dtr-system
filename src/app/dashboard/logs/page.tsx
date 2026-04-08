@@ -3,6 +3,7 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
+import { formatManilaTime } from "@/lib/datetime";
 
 function metricValue(value: number) {
   return Number.isFinite(value) ? value.toFixed(2) : "0.00";
@@ -57,8 +58,8 @@ export default async function AllLogsPage() {
                 {(logs ?? []).map((log) => (
                   <tr key={log.id} className="rounded-xl bg-slate-900/70 text-slate-200">
                     <td className="px-3 py-2 font-medium">{format(new Date(log.work_date), "MMM dd, yyyy")}</td>
-                    <td className="px-3 py-2">{format(new Date(log.time_in), "hh:mm a")}</td>
-                    <td className="px-3 py-2">{log.time_out ? format(new Date(log.time_out), "hh:mm a") : "-"}</td>
+                    <td className="px-3 py-2">{formatManilaTime(log.time_in)}</td>
+                    <td className="px-3 py-2">{formatManilaTime(log.time_out)}</td>
                     <td className="px-3 py-2">{log.break_minutes ?? 0} min</td>
                     <td className="px-3 py-2">{metricValue(Number(log.rendered_hours ?? 0))}</td>
                     <td className="px-3 py-2 text-xs text-slate-300">{log.notes ?? "-"}</td>
