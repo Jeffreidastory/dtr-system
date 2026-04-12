@@ -60,6 +60,7 @@ export async function addDtrLog(formData: FormData) {
   }
 
   revalidatePath("/dashboard");
+  revalidatePath("/dashboard/logs");
 }
 
 export async function updateOwnPendingLog(formData: FormData) {
@@ -103,6 +104,7 @@ export async function updateOwnPendingLog(formData: FormData) {
   }
 
   revalidatePath("/dashboard");
+  revalidatePath("/dashboard/logs");
 }
 
 export async function deleteOwnPendingLog(formData: FormData) {
@@ -124,6 +126,7 @@ export async function deleteOwnPendingLog(formData: FormData) {
   }
 
   revalidatePath("/dashboard");
+  revalidatePath("/dashboard/logs");
 }
 
 export async function signOut() {

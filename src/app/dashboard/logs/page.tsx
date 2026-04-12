@@ -3,11 +3,23 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
-import { formatManilaTime } from "@/lib/datetime";
+import { formatManilaTime, formatManilaTimeForInput } from "@/lib/datetime";
+
+import { deleteOwnPendingLog, updateOwnPendingLog } from "../actions";
 
 function metricValue(value: number) {
   return Number.isFinite(value) ? value.toFixed(2) : "0.00";
 }
+
+type LogRow = {
+  id: number;
+  work_date: string;
+  time_in: string;
+  time_out: string | null;
+  break_minutes: number;
+  rendered_hours: number;
+  notes: string | null;
+};
 
 export default async function AllLogsPage() {
   const supabase = await createClient();
@@ -24,6 +36,12 @@ export default async function AllLogsPage() {
     .select("id,work_date,time_in,time_out,break_minutes,rendered_hours,notes")
     .eq("user_id", user.id)
     .order("work_date", { ascending: false });
+
+  const typedLogs: LogRow[] = (logs ?? []).map((log) => ({
+    ...log,
+    break_minutes: Number(log.break_minutes ?? 0),
+    rendered_hours: Number(log.rendered_hours ?? 0),
+  }));
 
   return (
     <main className="min-h-screen bg-slate-950 px-4 py-8 md:px-8">
@@ -52,10 +70,11 @@ export default async function AllLogsPage() {
                   <th className="px-3 py-2">Break</th>
                   <th className="px-3 py-2">Hours</th>
                   <th className="px-3 py-2">Notes</th>
+                  <th className="px-3 py-2">Action</th>
                 </tr>
               </thead>
               <tbody>
-                {(logs ?? []).map((log) => (
+                {typedLogs.map((log) => (
                   <tr key={log.id} className="rounded-xl bg-slate-900/70 text-slate-200">
                     <td className="px-3 py-2 font-medium">{format(new Date(log.work_date), "MMM dd, yyyy")}</td>
                     <td className="px-3 py-2">{formatManilaTime(log.time_in)}</td>
@@ -63,12 +82,55 @@ export default async function AllLogsPage() {
                     <td className="px-3 py-2">{log.break_minutes ?? 0} min</td>
                     <td className="px-3 py-2">{metricValue(Number(log.rendered_hours ?? 0))}</td>
                     <td className="px-3 py-2 text-xs text-slate-300">{log.notes ?? "-"}</td>
+                    <td className="px-3 py-2">
+                      <details>
+                        <summary className="cursor-pointer text-xs font-semibold text-cyan-300">Manage</summary>
+                        <div className="mt-2 space-y-2 rounded-lg border border-slate-700 bg-slate-950 p-3">
+                          <form action={updateOwnPendingLog} className="space-y-2">
+                            <input type="hidden" name="id" value={log.id} />
+                            <input type="date" name="work_date" defaultValue={String(log.work_date)} className="w-full rounded-md border border-slate-600 bg-slate-900 px-2 py-1 text-slate-100" />
+                            <div className="grid grid-cols-2 gap-2">
+                              <input
+                                type="time"
+                                name="time_in"
+                                defaultValue={formatManilaTimeForInput(log.time_in)}
+                                className="w-full rounded-md border border-slate-600 bg-slate-900 px-2 py-1 text-slate-100"
+                              />
+                              <input
+                                type="time"
+                                name="time_out"
+                                defaultValue={formatManilaTimeForInput(log.time_out)}
+                                className="w-full rounded-md border border-slate-600 bg-slate-900 px-2 py-1 text-slate-100"
+                              />
+                            </div>
+                            <input
+                              type="number"
+                              name="break_minutes"
+                              min={0}
+                              defaultValue={log.break_minutes}
+                              className="w-full rounded-md border border-slate-600 bg-slate-900 px-2 py-1 text-slate-100"
+                            />
+                            <textarea
+                              name="notes"
+                              defaultValue={log.notes ?? ""}
+                              rows={2}
+                              className="w-full rounded-md border border-slate-600 bg-slate-900 px-2 py-1 text-slate-100"
+                            />
+                            <button className="w-full rounded-md bg-cyan-500 px-3 py-1.5 text-xs font-semibold text-slate-950">Update</button>
+                          </form>
+                          <form action={deleteOwnPendingLog}>
+                            <input type="hidden" name="id" value={log.id} />
+                            <button className="w-full rounded-md border border-rose-400/60 px-3 py-1.5 text-xs font-semibold text-rose-300">Delete</button>
+                          </form>
+                        </div>
+                      </details>
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
-          {(logs ?? []).length === 0 ? <p className="pt-4 text-sm text-slate-400">No records found.</p> : null}
+          {typedLogs.length === 0 ? <p className="pt-4 text-sm text-slate-400">No records found.</p> : null}
         </section>
       </div>
     </main>
