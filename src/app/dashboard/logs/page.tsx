@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { formatManilaTime, formatManilaTimeForInput } from "@/lib/datetime";
 
-import { deleteOwnPendingLog, updateOwnPendingLog } from "../actions";
+import ManageLogForms from "./ManageLogForms";
 
 function metricValue(value: number) {
   return Number.isFinite(value) ? value.toFixed(2) : "0.00";
@@ -85,44 +85,14 @@ export default async function AllLogsPage() {
                     <td className="px-3 py-2">
                       <details>
                         <summary className="cursor-pointer text-xs font-semibold text-cyan-300">Manage</summary>
-                        <div className="mt-2 space-y-2 rounded-lg border border-slate-700 bg-slate-950 p-3">
-                          <form action={updateOwnPendingLog} className="space-y-2">
-                            <input type="hidden" name="id" value={log.id} />
-                            <input type="date" name="work_date" defaultValue={String(log.work_date)} className="w-full rounded-md border border-slate-600 bg-slate-900 px-2 py-1 text-slate-100" />
-                            <div className="grid grid-cols-2 gap-2">
-                              <input
-                                type="time"
-                                name="time_in"
-                                defaultValue={formatManilaTimeForInput(log.time_in)}
-                                className="w-full rounded-md border border-slate-600 bg-slate-900 px-2 py-1 text-slate-100"
-                              />
-                              <input
-                                type="time"
-                                name="time_out"
-                                defaultValue={formatManilaTimeForInput(log.time_out)}
-                                className="w-full rounded-md border border-slate-600 bg-slate-900 px-2 py-1 text-slate-100"
-                              />
-                            </div>
-                            <input
-                              type="number"
-                              name="break_minutes"
-                              min={0}
-                              defaultValue={log.break_minutes}
-                              className="w-full rounded-md border border-slate-600 bg-slate-900 px-2 py-1 text-slate-100"
-                            />
-                            <textarea
-                              name="notes"
-                              defaultValue={log.notes ?? ""}
-                              rows={2}
-                              className="w-full rounded-md border border-slate-600 bg-slate-900 px-2 py-1 text-slate-100"
-                            />
-                            <button className="w-full rounded-md bg-cyan-500 px-3 py-1.5 text-xs font-semibold text-slate-950">Update</button>
-                          </form>
-                          <form action={deleteOwnPendingLog}>
-                            <input type="hidden" name="id" value={log.id} />
-                            <button className="w-full rounded-md border border-rose-400/60 px-3 py-1.5 text-xs font-semibold text-rose-300">Delete</button>
-                          </form>
-                        </div>
+                        <ManageLogForms
+                          id={log.id}
+                          workDate={String(log.work_date)}
+                          timeIn={formatManilaTimeForInput(log.time_in)}
+                          timeOut={formatManilaTimeForInput(log.time_out)}
+                          breakMinutes={log.break_minutes}
+                          notes={log.notes ?? ""}
+                        />
                       </details>
                     </td>
                   </tr>

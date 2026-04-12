@@ -5,6 +5,17 @@ import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
 
+export type LogUpdateActionState = {
+  status: "idle" | "success" | "error";
+  message: string;
+  updatedAt?: string;
+};
+
+export const initialLogUpdateActionState: LogUpdateActionState = {
+  status: "idle",
+  message: "",
+};
+
 function combineDateAndTime(dateValue: string, timeValue: string) {
   // Persist form times as Philippines local time (UTC+08) to avoid server-timezone shifts.
   return `${dateValue}T${timeValue}:00+08:00`;
@@ -105,6 +116,31 @@ export async function updateOwnPendingLog(formData: FormData) {
 
   revalidatePath("/dashboard");
   revalidatePath("/dashboard/logs");
+}
+
+export async function updateOwnPendingLogWithState(
+  _prevState: LogUpdateActionState,
+  formData: FormData,
+): Promise<LogUpdateActionState> {
+  try {
+    await updateOwnPendingLog(formData);
+    return {
+      status: "success",
+      message: "Record updated successfully.",
+      updatedAt: new Date().toISOString(),
+    };
+  } catch (error) {
+    const maybeRedirect = error as { digest?: string };
+    if (maybeRedirect?.digest?.startsWith("NEXT_REDIRECT")) {
+      throw error;
+    }
+
+    return {
+      status: "error",
+      message: error instanceof Error ? error.message : "Unable to update record. Please try again.",
+      updatedAt: new Date().toISOString(),
+    };
+  }
 }
 
 export async function deleteOwnPendingLog(formData: FormData) {
