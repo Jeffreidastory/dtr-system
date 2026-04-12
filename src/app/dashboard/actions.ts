@@ -5,17 +5,6 @@ import { redirect } from "next/navigation";
 
 import { createClient } from "@/lib/supabase/server";
 
-export type LogUpdateActionState = {
-  status: "idle" | "success" | "error";
-  message: string;
-  updatedAt?: string;
-};
-
-export const initialLogUpdateActionState: LogUpdateActionState = {
-  status: "idle",
-  message: "",
-};
-
 function combineDateAndTime(dateValue: string, timeValue: string) {
   // Persist form times as Philippines local time (UTC+08) to avoid server-timezone shifts.
   return `${dateValue}T${timeValue}:00+08:00`;
@@ -119,9 +108,9 @@ export async function updateOwnPendingLog(formData: FormData) {
 }
 
 export async function updateOwnPendingLogWithState(
-  _prevState: LogUpdateActionState,
+  _prevState: { status: "idle" | "success" | "error"; message: string; updatedAt?: string },
   formData: FormData,
-): Promise<LogUpdateActionState> {
+): Promise<{ status: "idle" | "success" | "error"; message: string; updatedAt?: string }> {
   try {
     await updateOwnPendingLog(formData);
     return {

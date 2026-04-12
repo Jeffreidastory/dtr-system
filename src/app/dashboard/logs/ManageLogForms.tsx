@@ -4,11 +4,18 @@ import { useActionState, useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import { useRouter } from "next/navigation";
 
-import {
-  deleteOwnPendingLog,
-  initialLogUpdateActionState,
-  updateOwnPendingLogWithState,
-} from "../actions";
+import { deleteOwnPendingLog, updateOwnPendingLogWithState } from "../actions";
+
+type UpdateActionState = {
+  status: "idle" | "success" | "error";
+  message: string;
+  updatedAt?: string;
+};
+
+const initialLogUpdateActionState: UpdateActionState = {
+  status: "idle",
+  message: "",
+};
 
 type ManageLogFormsProps = {
   id: number;
